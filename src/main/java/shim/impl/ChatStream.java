@@ -59,7 +59,7 @@ public class ChatStream implements StreamObserver<SmartcontractShim.SmartContrac
 	public void onNext(SmartcontractShim.SmartContractMessage message) {
 			logger.info("Got message from peer: " + toJsonString(message));
 		try {
-			logger.info(String.format("[%-8s]Received message %s from org.hyperledger.fabric.shim", message.getTxid(), message.getType()));
+			logger.info(String.format("[%-8s]Received message %s from org.bcia.javachain.shim", message.getTxid(), message.getType()));
 			handler.handleMessage(message);
 		} catch (Exception e) {
 			System.exit(-1);
