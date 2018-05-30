@@ -24,7 +24,7 @@ import shim.SmartContractBase;
  * @date 2018/05/26
  * @company Dingxuan
  */
-public class MyCC extends SmartContractBase {
+public class MyCc extends SmartContractBase {
 
   @Override
   public SmartContractResponse init(ISmartContractStub stub) {
