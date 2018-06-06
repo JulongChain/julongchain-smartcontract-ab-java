@@ -14,7 +14,11 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- * Created by Benjamin on 2018/6/6.
+ * 类描述
+ *
+ * @author lishaojie
+ * @date 2018/06/6
+ * @company Dingxuan
  */
     public class Example01 extends SmartContractBase {
 

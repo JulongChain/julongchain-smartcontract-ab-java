@@ -15,7 +15,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by Benjamin on 2018/6/6.
+ * 类描述
+ *
+ * @author lishaojie
+ * @date 2018/06/6
+ * @company Dingxuan
  */
 public class Example01Test {
     private ISmartContractStub stub = mock(ISmartContractStub.class);
