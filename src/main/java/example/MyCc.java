@@ -1,5 +1,4 @@
-/**
- * Copyright Dingxuan. All Rights Reserved.
+/*copyright Dingxuan. All Rights Reserved.
  *
  * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +20,6 @@ import shim.SmartContractBase;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * 类描述
@@ -52,22 +50,30 @@ public class MyCc extends SmartContractBase {
   public SmartContractResponse invoke(ISmartContractStub stub) {
     log.info("=================================================>>>> myCc invoke");
     List<byte[]> args1 = stub.getArgs();
-    log.info(args.toString());
+    log.info("args1:" + args1.toString());
     log.info("args size:" + args1.size());
 
     final String function = stub.getFunction();
     final String[] args = stub.getParameters().toArray(new String[0]);
 
-    switch (function) {
-      case "invoke":
-        return invoke(stub, args);
-      case "query":
-        return query(stub, args);
-      default:
-        return newErrorResponse(format("未知方法: %s", function));
-    }
+    log.info("function:" + function);
+    stub.putState("a", "10".getBytes());
+    stub.putState("b", "20".getBytes());
+    //log.info("1:" + args[0]);
+    //log.info("2:" + args[1]);
+    //log.info("3:" + args[2]);
 
     return newSuccessResponse();
+/**
+
+ switch (function) {
+ case "invoke":
+ return invoke(stub, args);
+ case "query":
+ return query(stub, args);
+ default:
+ return newErrorResponse(format("未知方法: %s", function));
+ }*/
   }
 
   @Override
@@ -83,34 +89,42 @@ public class MyCc extends SmartContractBase {
     final String toKey = args[1]; // B
     final String amount = args[2]; // C
 
-    // 获取身份信息
-    final String fromKeyState = stub.getStringState(fromKey);
-    final String toKeyState = stub.getStringState(toKey);
+    stub.putState(toKey, amount.getBytes());
 
-    // 转账人余额获取类型转换
-    Double fromAccountBalance = Double.parseDouble(fromKeyState);
-    Double toAccountBalance = Double.parseDouble(toKeyState);
+    return newSuccessResponse();
 
-    // 转账金额类型转换
-    Double transferAmount = Double.parseDouble(amount);
+/**
 
-    // 确保金额足够
-    if (transferAmount > fromAccountBalance) {
-      throw new IllegalArgumentException("资金不足");
-    }
+ // 获取身份信息
+ final String fromKeyState = stub.getStringState(fromKey);
+ final String toKeyState = stub.getStringState(toKey);
 
-    // 转账操作
-    log.info(format("转账人：%s 转 %f 元给转账人：%s", fromKey, transferAmount, toKey));
-    Double newFromAccountBalance = fromAccountBalance - transferAmount;
-    Double newToAccountBalance = toAccountBalance + transferAmount;
-    log.info(
-        format(
-            "各自余额为: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
-    stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
-    stub.putStringState(toKey, Double.toString(newToAccountBalance));
-    log.info("转账结束.");
+ // 转账人余额获取类型转换
+ Double fromAccountBalance = Double.parseDouble(fromKeyState);
+ Double toAccountBalance = Double.parseDouble(toKeyState);
 
-    return newSuccessResponse(format("成功转账 %f ,", transferAmount));
+ // 转账金额类型转换
+ Double transferAmount = Double.parseDouble(amount);
+
+ // 确保金额足够
+ if (transferAmount > fromAccountBalance) {
+ throw new IllegalArgumentException("资金不足");
+ }
+
+ // 转账操作
+ log.info(format("转账人：%s 转 %f 元给转账人：%s", fromKey, transferAmount, toKey));
+ Double newFromAccountBalance = fromAccountBalance - transferAmount;
+ Double newToAccountBalance = toAccountBalance + transferAmount;
+ log.info(
+ format(
+ "各自余额为: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
+ stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
+ stub.putStringState(toKey, Double.toString(newToAccountBalance));
+ log.info("转账结束.");
+
+ return newSuccessResponse(format("成功转账 %f ,", transferAmount));
+
+ */
   }
 
   // 查询
