@@ -104,13 +104,13 @@ public class Example01Test {
 
         Example01 t=new Example01();
         ISmartContract.SmartContractResponse smartContractResponse=t.invoke(stub);
-        String a="1";
-        try {
-            a = new String(smartContractResponse.getPayload(),"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        System.out.println(a);
+//        String a="1";
+//        try {
+//            a = new String(smartContractResponse.getPayload(),"UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println(smartContractResponse.getMessage());
         assertThat(smartContractResponse.getStatus(), is(ISmartContract.SmartContractResponse.Status.SUCCESS));
     }
 

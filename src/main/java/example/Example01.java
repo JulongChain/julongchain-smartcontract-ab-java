@@ -219,7 +219,7 @@ import static java.lang.String.format;
 
             final String accountKey = args[0];
             //账户信息查询：用户和余额
-            JSONObject message= JSON.parseObject("Name:"+accountKey.toUpperCase()+"Amount:"+stub.getStringState(accountKey));
+            JSONObject message= JSON.parseObject("{\"Name\":\""+accountKey.toUpperCase()+"\",\"Amount\":"+stub.getStringState(accountKey)+"}");
             return newSuccessResponse(message.toString());
 
         }
