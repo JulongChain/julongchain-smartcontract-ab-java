@@ -45,15 +45,15 @@ public abstract class SmartContractBase implements ISmartContract {
   private int port = DEFAULT_PORT;
   private String hostOverrideAuthority = "";
   private boolean tlsEnabled = false;
-  private String rootCertFile = "/etc/hyperledger/fabric/peer.crt";
+  private String rootCertFile = "/etc/bcia/julongchain/node.crt";
 
   protected String id;
 
   private static final String CORE_SMARTCONTRACT_ID_NAME = "CORE_SMARTCONTRACT_ID_NAME";
-  private static final String CORE_PEER_ADDRESS = "CORE_PEER_ADDRESS";
-  private static final String CORE_PEER_TLS_ENABLED = "CORE_PEER_TLS_ENABLED";
-  private static final String CORE_PEER_TLS_SERVERHOSTOVERRIDE = "CORE_PEER_TLS_SERVERHOSTOVERRIDE";
-  private static final String CORE_PEER_TLS_ROOTCERT_FILE = "CORE_PEER_TLS_ROOTCERT_FILE";
+  private static final String CORE_NODE_ADDRESS = "CORE_NODE_ADDRESS";
+  private static final String CORE_NODE_TLS_ENABLED = "CORE_NODE_TLS_ENABLED";
+  private static final String CORE_NODE_TLS_SERVERHOSTOVERRIDE = "CORE_NODE_TLS_SERVERHOSTOVERRIDE";
+  private static final String CORE_NODE_TLS_ROOTCERT_FILE = "CORE_NODE_TLS_ROOTCERT_FILE";
 
   /**
    * Start smartcontract
@@ -118,16 +118,16 @@ public abstract class SmartContractBase implements ISmartContract {
     if (System.getenv().containsKey(CORE_SMARTCONTRACT_ID_NAME)) {
       this.id = System.getenv(CORE_SMARTCONTRACT_ID_NAME);
     }
-    if (System.getenv().containsKey(CORE_PEER_ADDRESS)) {
-      this.host = System.getenv(CORE_PEER_ADDRESS);
+    if (System.getenv().containsKey(CORE_NODE_ADDRESS)) {
+      this.host = System.getenv(CORE_NODE_ADDRESS);
     }
-    if (System.getenv().containsKey(CORE_PEER_TLS_ENABLED)) {
-      this.tlsEnabled = Boolean.parseBoolean(System.getenv(CORE_PEER_TLS_ENABLED));
-      if (System.getenv().containsKey(CORE_PEER_TLS_SERVERHOSTOVERRIDE)) {
-        this.hostOverrideAuthority = System.getenv(CORE_PEER_TLS_SERVERHOSTOVERRIDE);
+    if (System.getenv().containsKey(CORE_NODE_TLS_ENABLED)) {
+      this.tlsEnabled = Boolean.parseBoolean(System.getenv(CORE_NODE_TLS_ENABLED));
+      if (System.getenv().containsKey(CORE_NODE_TLS_SERVERHOSTOVERRIDE)) {
+        this.hostOverrideAuthority = System.getenv(CORE_NODE_TLS_SERVERHOSTOVERRIDE);
       }
-      if (System.getenv().containsKey(CORE_PEER_TLS_ROOTCERT_FILE)) {
-        this.rootCertFile = System.getenv(CORE_PEER_TLS_ROOTCERT_FILE);
+      if (System.getenv().containsKey(CORE_NODE_TLS_ROOTCERT_FILE)) {
+        this.rootCertFile = System.getenv(CORE_NODE_TLS_ROOTCERT_FILE);
       }
     }
   }
