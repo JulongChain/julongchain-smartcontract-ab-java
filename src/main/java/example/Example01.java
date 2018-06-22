@@ -14,7 +14,7 @@ import java.util.*;
 import static java.lang.String.format;
 
 /**
- * 类描述
+ * Auction Example
  *
  * @author lishaojie
  * @date 2018/06/6
@@ -63,10 +63,12 @@ import static java.lang.String.format;
                         temporaryRunnable.setStub(stub);
                         Thread temporaryThread = new Thread(temporaryRunnable);
                         temporaryThread.start();
-                        //stemporaryThread.sleep(100000);
-                        return newSuccessResponse("拍卖可运行");
+
+
+                        temporaryThread.sleep(10000);
+                        return newSuccessResponse("Auction is going on");
                     default:
-                        return newErrorResponse(format("方法错误: %s", function));
+                        return newErrorResponse(format("Unknown parameter: %s", function));
                 }
             } catch (Throwable e) {
                 return newErrorResponse(e);
@@ -89,18 +91,18 @@ import static java.lang.String.format;
                 Date Dauctionstart=sdf.parse(auctionstart);
 
                 if (Dendtime.before(Dauctionstart)){
-                    return newErrorResponse("结束日期需晚于开始日期");
+                    return newErrorResponse("End date must be later than start date");
                 }
 
             }catch (Throwable e){
-                return newErrorResponse("日期格式错误");
+                return newErrorResponse("Date format is wrong");
             }
 
             stub.putStringState("state", state);
             stub.putStringState("auctionstart", auctionstart);
             stub.putStringState("endtime", endtime);
 
-            return newSuccessResponse("拍卖会信息录入成功");
+            return newSuccessResponse("Auction information entered successfully");
         }
 
         //拍卖会进程创建
@@ -119,6 +121,7 @@ import static java.lang.String.format;
                     if (now.after(auctionstart)) {
                         if (now.before(endtime)) {
                             setBid(stub,args);
+                            System.out.println("running");
                         }else{
                             stub.putStringState("state", Boolean.toString(false));
                         }
@@ -148,7 +151,7 @@ import static java.lang.String.format;
                     case "getBid"://获取价格
                         return getBid(stub,args);
                     default:
-                        return newErrorResponse(format("未知方法: %s", function));
+                        return newErrorResponse(format("Unknown parameter: %s", function));
                 }
             } catch (Throwable e) {
                 return newErrorResponse(e);
@@ -158,7 +161,7 @@ import static java.lang.String.format;
 
         //转账
         private SmartContractResponse invoke(ISmartContractStub stub, String[] args) {
-            if (args.length != 3) throw new IllegalArgumentException("参数错误");
+            if (args.length != 3) throw new IllegalArgumentException("Incorrect parameter format");
             //转账，Ａ转账给Ｂ，金额Ｃ
             final String fromKey = args[0];//A
             final String toKey = args[1];//B
@@ -177,19 +180,19 @@ import static java.lang.String.format;
 
             // 确保金额足够
             if (transferAmount > fromAccountBalance) {
-                throw new IllegalArgumentException("资金不足");
+                throw new IllegalArgumentException("Insufficient funds");
             }
 
             // 转账操作
-            log.info(format("转账人：%s 转 %f 元给转账人：%s", fromKey,transferAmount, toKey ));
+            log.info(format("Transfer: %s to %f to transfer: %s", fromKey,transferAmount, toKey ));
             Double newFromAccountBalance = fromAccountBalance - transferAmount;
             Double newToAccountBalance = toAccountBalance + transferAmount;
-            log.info(format("各自余额为: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
+            log.info(format("The respective balances are: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
             stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
             stub.putStringState(toKey, Double.toString(newToAccountBalance));
-            log.info("转账结束.");
+            log.info("Transfer finished.");
 
-            return newSuccessResponse(format("成功转账 %f ,",transferAmount));
+            return newSuccessResponse(format("Successful transfer of %f ,",transferAmount));
         }
 
         //价格查询
@@ -205,17 +208,17 @@ import static java.lang.String.format;
             Double HighestBid=Double.parseDouble(a[1]);
             if(now.after(endtime)){
                 stub.putStringState("GoldenApple", HighestBidder);
-                System.out.println("拍卖结束");
+                System.out.println("End of auction");
             }else{
-                System.out.println(format("此次最高出价: %f ,出价人: %s", HighestBid,HighestBidder));
+                System.out.println(format("This maximum bid: %f ,Bidder: %s", HighestBid,HighestBidder));
             }
 
-            return newSuccessResponse("xx");
+            return newSuccessResponse("Successful bid");
         }
 
         //查询
         private SmartContractResponse query(ISmartContractStub stub, String[] args) {
-            if (args.length != 1) throw new IllegalArgumentException("参数错误");
+            if (args.length != 1) throw new IllegalArgumentException("Unknown parameter");
 
             final String accountKey = args[0];
             //账户信息查询：用户和余额
@@ -229,7 +232,7 @@ import static java.lang.String.format;
         private void setBid(ISmartContractStub stub,String[] args){
             //初始化出价人及其出价　
             //args[0]="liu";args[1]="200.0";arg[2]="wang";args[3]="220.0";
-            if (args.length != 4) throw new IllegalArgumentException("参数错误");
+            if (args.length != 4) throw new IllegalArgumentException("Unknown parameter");
             String HighestBidder="wu";
             HashMap<String,Double> BidderandBid=new HashMap<>();
             Double Bid1=Double.parseDouble(args[1]);
@@ -301,7 +304,7 @@ import static java.lang.String.format;
 
         //商品录入
         private SmartContractResponse initCommodity(ISmartContractStub stub,String[] args){
-            if (args.length != 4) throw new IllegalArgumentException("参数错误");
+            if (args.length != 4) throw new IllegalArgumentException("Unknown parameter");
 
             Commodity Commodity=new Commodity();
             Commodity.setName(args[0]) ;
@@ -312,11 +315,11 @@ import static java.lang.String.format;
             JSONObject jsonCommodity=(JSONObject)JSONObject.toJSON(Commodity);
 
             if(stub.getState(Commodity.getName())!=null){
-                return newErrorResponse(format("该商品已经存在: %s", Commodity.getName()));
+                return newErrorResponse(format("The product already exists: %s", Commodity.getName()));
             }else{
                 stub.putStringState(Commodity.getName(), jsonCommodity.toString());
 
-                return newSuccessResponse(format("商品录入成功,所有者: %s",Commodity.getOwner()));
+                return newSuccessResponse(format("Product entry successful,owner: %s",Commodity.getOwner()));
             }
 
         }
@@ -366,7 +369,7 @@ import static java.lang.String.format;
         //竞拍人信息录入
         private SmartContractResponse initBidder(ISmartContractStub stub,String[] args){
 
-            if (args.length != 4) throw new IllegalArgumentException("参数错误");
+            if (args.length != 4) throw new IllegalArgumentException("Unknown parameter");
 
             Bidder Bidder=new Bidder();
             Bidder.setName(args[0]);
@@ -377,10 +380,10 @@ import static java.lang.String.format;
             JSONObject jsonBidder=(JSONObject)JSONObject.toJSON(Bidder);
             // System.out.println(stub.getState(Bidder.getName()));
             if(stub.getState(Bidder.getName())!=null){
-                return newErrorResponse(format("该竞拍人已经存在: %s", Bidder.getName()));
+                return newErrorResponse(format("The bidder already exists: %s", Bidder.getName()));
             }else{
                 stub.putStringState(Bidder.getName(), jsonBidder.toString());
-                return newSuccessResponse(format("竞拍人信息录入成功 : %s",Bidder.getName()));
+                return newSuccessResponse(format("Bidders entered information successfully : %s",Bidder.getName()));
             }
         }
 

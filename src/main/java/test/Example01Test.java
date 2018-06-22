@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * 类描述
+ * Example Test
  *
  * @author lishaojie
  * @date 2018/06/6
@@ -47,8 +47,8 @@ public class Example01Test {
         String[] Init={"true","200.0","AAA","320.0"};
         List<String> list=Arrays.asList(Init);
 
-        when(stub.getStringState("auctionstart")).thenReturn("2018-5-21 11:02:12");
-        when(stub.getStringState("endtime")).thenReturn("2018-5-25 12:20:12");
+        when(stub.getStringState("auctionstart")).thenReturn("2018-6-21 10:02:12");
+        when(stub.getStringState("endtime")).thenReturn("2018-6-25 12:20:12");
         when(stub.getStringState("state")).thenReturn("true","true");
         when(stub.getStringState("HighestBidder")).thenReturn("liu:1.234");
         when(stub.getFunction()).thenReturn("initAuction");
@@ -120,15 +120,15 @@ public class Example01Test {
         List<String> list=Arrays.asList(Init);
         when(stub.getFunction()).thenReturn("getBid");
         when(stub.getParameters()).thenReturn(list);
-        when(stub.getStringState("auctionstart")).thenReturn("2018-5-21 11:02:12");
-        when(stub.getStringState("endtime")).thenReturn("2018-5-22 12:20:12");
+        when(stub.getStringState("auctionstart")).thenReturn("2018-6-21 10:02:12");
+        when(stub.getStringState("endtime")).thenReturn("2018-6-23 12:20:12");
         when(stub.getStringState("state")).thenReturn("true","true");
         when(stub.getStringState("HighestBidder")).thenReturn("liu:1.234");
 
         Example01 t=new Example01();
         ISmartContract.SmartContractResponse smartContractResponse=t.invoke(stub);
 //        System.out.println(smartContractResponse.getMessage());
-//        System.out.println(smartContractResponse.getStatus());
+        System.out.println(smartContractResponse.getStatus());
 //        assertThat(smartContractResponse.getStatus(), is(ISmartContract.SmartContractResponse.Status.SUCCESS));
     }
 
