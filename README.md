@@ -1,1 +1,1 @@
-javachain-chaincode
+javachain-smartcontract-java
