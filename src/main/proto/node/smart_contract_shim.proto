@@ -11,7 +11,7 @@ syntax = "proto3";
 package protos;
 option java_package = "org.bcia.javachain.protos.node";
 option go_package = "github.com/hyperledger/fabric/protos/peer";
-import "node/smartcontract_event.proto";
+import "src/main/proto/node/smart_contract_event.proto";
 import "node/proposal.proto";
 import "google/protobuf/timestamp.proto";
 
