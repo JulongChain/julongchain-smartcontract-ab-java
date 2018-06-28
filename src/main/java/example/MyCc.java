@@ -19,7 +19,6 @@ import shim.SmartContractBase;
 
 import java.util.List;
 
-import static java.lang.String.format;
 
 /**
  * 类描述
@@ -43,6 +42,7 @@ public class MyCc extends SmartContractBase {
     }
     stub.putState("a", "100".getBytes());
     stub.putState("b", "200".getBytes());
+    stub.putState("c", "300".getBytes());
     return newSuccessResponse();
   }
 
@@ -58,80 +58,17 @@ public class MyCc extends SmartContractBase {
 
     log.info("function:" + function);
     stub.putState("a", "10".getBytes());
-    stub.putState("b", "20".getBytes());
-    //log.info("1:" + args[0]);
-    //log.info("2:" + args[1]);
-    //log.info("3:" + args[2]);
+    byte[] bytes = stub.getState("b");
+    if (bytes != null && bytes.length > 0) {
+      int temp = Integer.parseInt(new String(bytes));
+      stub.putState("b", ((temp - 1) + "").getBytes());
+    }
 
     return newSuccessResponse();
-/**
-
- switch (function) {
- case "invoke":
- return invoke(stub, args);
- case "query":
- return query(stub, args);
- default:
- return newErrorResponse(format("未知方法: %s", function));
- }*/
   }
 
   @Override
   public String getSmartContractStrDescription() {
     return "MyCC";
-  }
-
-  // 转账
-  private SmartContractResponse invoke(ISmartContractStub stub, String[] args) {
-    if (args.length != 3) throw new IllegalArgumentException("参数错误");
-    // 转账，Ａ转账给Ｂ，金额Ｃ
-    final String fromKey = args[0]; // A
-    final String toKey = args[1]; // B
-    final String amount = args[2]; // C
-
-    stub.putState(toKey, amount.getBytes());
-
-    return newSuccessResponse();
-
-/**
-
- // 获取身份信息
- final String fromKeyState = stub.getStringState(fromKey);
- final String toKeyState = stub.getStringState(toKey);
-
- // 转账人余额获取类型转换
- Double fromAccountBalance = Double.parseDouble(fromKeyState);
- Double toAccountBalance = Double.parseDouble(toKeyState);
-
- // 转账金额类型转换
- Double transferAmount = Double.parseDouble(amount);
-
- // 确保金额足够
- if (transferAmount > fromAccountBalance) {
- throw new IllegalArgumentException("资金不足");
- }
-
- // 转账操作
- log.info(format("转账人：%s 转 %f 元给转账人：%s", fromKey, transferAmount, toKey));
- Double newFromAccountBalance = fromAccountBalance - transferAmount;
- Double newToAccountBalance = toAccountBalance + transferAmount;
- log.info(
- format(
- "各自余额为: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
- stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
- stub.putStringState(toKey, Double.toString(newToAccountBalance));
- log.info("转账结束.");
-
- return newSuccessResponse(format("成功转账 %f ,", transferAmount));
-
- */
-  }
-
-  // 查询
-  private SmartContractResponse query(ISmartContractStub stub, String[] args) {
-    if (args.length != 1) throw new IllegalArgumentException("参数错误");
-    final String accountKey = args[0];
-    double amount = Double.parseDouble(stub.getStringState(accountKey));
-    return newSuccessResponse(format("成功查询 Name:" + accountKey + ", Amount:" + amount));
   }
 }
