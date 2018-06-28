@@ -6,12 +6,12 @@ SPDX-License-Identifier: Apache-2.0
 
 package shim;
 
+import org.bcia.julongchain.protos.node.ProposalPackage;
+import org.bcia.julongchain.protos.node.SmartContractEventPackage;
 import shim.ledger.CompositeKey;
 import shim.ledger.IKeyModification;
 import shim.ledger.IKeyValue;
 import shim.ledger.IQueryResultsIterator;
-import org.bcia.javachain.protos.node.ProposalPackage.SignedProposal;
-import org.bcia.javachain.protos.node.SmartContractEventPackage;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -298,7 +298,7 @@ public interface ISmartContractStub {
 	 * @return null if the current transaction is an internal call to a system
 	 *         smartcontract.
 	 */
-	SignedProposal getSignedProposal();
+	ProposalPackage.SignedProposal getSignedProposal();
 
 	/**
 	 * Returns the timestamp when the transaction was created.

@@ -6,14 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 
 package shim.impl;
 
-import org.bcia.javachain.protos.node.SmartcontractShim;
+import org.bcia.julongchain.protos.node.SmartContractShim;
 
 public class NextStateInfo {
 
-	public SmartcontractShim.SmartContractMessage message;
+	public SmartContractShim.SmartContractMessage message;
 	public boolean sendToSC;
 
-	public NextStateInfo(SmartcontractShim.SmartContractMessage message, boolean sendToSC) {
+	public NextStateInfo(SmartContractShim.SmartContractMessage message, boolean sendToSC) {
 		this.message = message;
 		this.sendToSC = sendToSC;
 	}

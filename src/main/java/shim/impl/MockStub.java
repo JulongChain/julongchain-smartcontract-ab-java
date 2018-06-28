@@ -20,14 +20,14 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bcia.julongchain.protos.node.ProposalPackage;
+import org.bcia.julongchain.protos.node.SmartContractEventPackage;
 import shim.ISmartContract;
 import shim.ISmartContractStub;
 import shim.ledger.CompositeKey;
 import shim.ledger.IKeyModification;
 import shim.ledger.IKeyValue;
 import shim.ledger.IQueryResultsIterator;
-import org.bcia.javachain.protos.node.ProposalPackage;
-import org.bcia.javachain.protos.node.SmartContractEventPackage;
 
 import java.time.Instant;
 import java.util.*;

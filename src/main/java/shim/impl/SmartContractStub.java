@@ -9,6 +9,9 @@ package shim.impl;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Timestamp;
+import org.bcia.julongchain.protos.node.ProposalPackage;
+import org.bcia.julongchain.protos.node.SmartContractEventPackage;
+import org.bcia.julongchain.protos.node.SmartContractShim;
 import shim.ISmartContract;
 import shim.ISmartContractStub;
 import shim.ledger.CompositeKey;
@@ -21,11 +24,6 @@ import org.bcia.javachain.protos.common.Common.HeaderType;
 import org.bcia.javachain.protos.common.Common.SignatureHeader;
 import org.bcia.javachain.protos.ledger.queryresult.KvQueryResult;
 import org.bcia.javachain.protos.ledger.queryresult.KvQueryResult.KV;
-import org.bcia.javachain.protos.node.ProposalPackage;
-import org.bcia.javachain.protos.node.ProposalPackage.Proposal;
-import org.bcia.javachain.protos.node.ProposalPackage.SignedProposal;
-import org.bcia.javachain.protos.node.SmartContractEventPackage;
-import org.bcia.javachain.protos.node.SmartcontractShim;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -47,14 +45,14 @@ class SmartContractStub implements ISmartContractStub {
 	private final String txId;
 	private final Handler handler;
 	private final List<ByteString> args;
-	private final SignedProposal signedProposal;
+	private final ProposalPackage.SignedProposal signedProposal;
 	private final Instant txTimestamp;
 	private final ByteString creator;
 	private final Map<String, ByteString> transientMap;
 	private final byte[] binding;
 	private SmartContractEventPackage.SmartContractEvent event;
 
-	SmartContractStub(String channelId, String txId, Handler handler, List<ByteString> args, SignedProposal signedProposal) {
+	SmartContractStub(String channelId, String txId, Handler handler, List<ByteString> args, ProposalPackage.SignedProposal signedProposal) {
 		this.channelId = channelId;
 		this.txId = txId;
 		this.handler = handler;
@@ -67,7 +65,7 @@ class SmartContractStub implements ISmartContractStub {
 			this.binding = null;
 		} else {
 			try {
-				final Proposal proposal = Proposal.parseFrom(signedProposal.getProposalBytes());
+				final ProposalPackage.Proposal proposal = ProposalPackage.Proposal.parseFrom(signedProposal.getProposalBytes());
 				final Header header = Header.parseFrom(proposal.getHeader());
 				final Common.GroupHeader groupHeader = Common.GroupHeader.parseFrom(header.getGroupHeader());
 				validateProposalType(groupHeader);
@@ -196,8 +194,8 @@ class SmartContractStub implements ISmartContractStub {
 				);
 	}
 
-	private Function<SmartcontractShim.QueryResultBytes, KV> queryResultBytesToKv = new Function<SmartcontractShim.QueryResultBytes, KV>() {
-		public KV apply(SmartcontractShim.QueryResultBytes queryResultBytes) {
+	private Function<SmartContractShim.QueryResultBytes, KV> queryResultBytesToKv = new Function<SmartContractShim.QueryResultBytes, KV>() {
+		public KV apply(SmartContractShim.QueryResultBytes queryResultBytes) {
 			try {
 				return KV.parseFrom(queryResultBytes.getResultBytes());
 			} catch (InvalidProtocolBufferException e) {
@@ -241,8 +239,8 @@ class SmartContractStub implements ISmartContractStub {
 				);
 	}
 
-	private Function<SmartcontractShim.QueryResultBytes, KvQueryResult.KeyModification> queryResultBytesToKeyModification = new Function<SmartcontractShim.QueryResultBytes, KvQueryResult.KeyModification>() {
-		public KvQueryResult.KeyModification apply(SmartcontractShim.QueryResultBytes queryResultBytes) {
+	private Function<SmartContractShim.QueryResultBytes, KvQueryResult.KeyModification> queryResultBytesToKeyModification = new Function<SmartContractShim.QueryResultBytes, KvQueryResult.KeyModification>() {
+		public KvQueryResult.KeyModification apply(SmartContractShim.QueryResultBytes queryResultBytes) {
 			try {
 				return KvQueryResult.KeyModification.parseFrom(queryResultBytes.getResultBytes());
 			} catch (InvalidProtocolBufferException e) {

@@ -6,9 +6,8 @@ SPDX-License-Identifier: Apache-2.0
 
 package shim.impl;
 
+import org.bcia.julongchain.protos.node.SmartContractShim;
 import shim.ledger.IQueryResultsIterator;
-import org.bcia.javachain.protos.node.SmartcontractShim.QueryResponse;
-import org.bcia.javachain.protos.node.SmartcontractShim.QueryResultBytes;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -20,11 +19,11 @@ class QueryResultsIterator<T> implements IQueryResultsIterator<T> {
 	private final Handler handler;
 	private final String channelId;
 	private final String txId;
-	private Iterator<QueryResultBytes> currentIterator;
-	private QueryResponse currentQueryResponse;
-	private Function<QueryResultBytes, T> mapper;
+	private Iterator<SmartContractShim.QueryResultBytes> currentIterator;
+	private SmartContractShim.QueryResponse currentQueryResponse;
+	private Function<SmartContractShim.QueryResultBytes, T> mapper;
 
-	public QueryResultsIterator(final Handler handler, final String channelId, final String txId, final QueryResponse queryResponse, Function<QueryResultBytes, T> mapper) {
+	public QueryResultsIterator(final Handler handler, final String channelId, final String txId, final SmartContractShim.QueryResponse queryResponse, Function<SmartContractShim.QueryResultBytes, T> mapper) {
 		this.handler = handler;
 		this.channelId = channelId;
 		this.txId = txId;
@@ -67,7 +66,7 @@ class QueryResultsIterator<T> implements IQueryResultsIterator<T> {
 	public void close() throws Exception {
 		this.handler.queryStateClose(channelId, txId, currentQueryResponse.getId());
 		this.currentIterator = Collections.emptyIterator();
-		this.currentQueryResponse = QueryResponse.newBuilder().setHasMore(false).build();
+		this.currentQueryResponse = SmartContractShim.QueryResponse.newBuilder().setHasMore(false).build();
 	}
 
 }

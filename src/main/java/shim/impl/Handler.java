@@ -11,6 +11,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bcia.julongchain.protos.node.SmartContractEventPackage;
+import org.bcia.julongchain.protos.node.SmartContractPackage;
+import org.bcia.julongchain.protos.node.SmartContractShim;
 import shim.ISmartContract;
 import shim.ISmartContractStub;
 import shim.fsm.CBDesc;
@@ -22,9 +25,6 @@ import shim.fsm.exceptions.NoTransitionException;
 import shim.helper.Channel;
 import org.bcia.javachain.protos.node.ProposalResponsePackage.Response;
 import org.bcia.javachain.protos.node.ProposalResponsePackage.Response.Builder;
-import org.bcia.javachain.protos.node.SmartContractEventPackage;
-import org.bcia.javachain.protos.node.Smartcontract;
-import org.bcia.javachain.protos.node.SmartcontractShim.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.bcia.julongchain.protos.node.SmartContractShim.SmartContractMessage.Type.*;
 import static shim.fsm.CallbackType.AFTER_EVENT;
 import static shim.fsm.CallbackType.BEFORE_EVENT;
-import static org.bcia.javachain.protos.node.SmartcontractShim.SmartContractMessage.Type.*;
 
 public class Handler {
 
@@ -46,7 +46,7 @@ public class Handler {
 	private ISmartContract smartcontract;
 
 	private Map<String, Boolean> isTransaction;
-	private Map<String, Channel<SmartContractMessage>> responseChannel;
+	private Map<String, Channel<SmartContractShim.SmartContractMessage>> responseChannel;
 	Channel<NextStateInfo> nextState;
 
 	private FSM fsm;
@@ -55,7 +55,7 @@ public class Handler {
 		this.chatStream = chatStream;
 		this.smartcontract = smartcontract;
 
-		responseChannel = new HashMap<String, Channel<SmartContractMessage>>();
+		responseChannel = new HashMap<String, Channel<SmartContractShim.SmartContractMessage>>();
 		isTransaction = new HashMap<String, Boolean>();
 		nextState = new Channel<NextStateInfo>();
 
@@ -89,16 +89,16 @@ public class Handler {
 		return channelId+txid;
 	}
 
-	private void triggerNextState(SmartContractMessage message, boolean send) {
+	private void triggerNextState(SmartContractShim.SmartContractMessage message, boolean send) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("triggerNextState for message " + message);
 		}
 		nextState.add(new NextStateInfo(message, send));
 	}
 
-	private synchronized Channel<SmartContractMessage> aquireResponseChannelForTx(final String channelId, final String
+	private synchronized Channel<SmartContractShim.SmartContractMessage> aquireResponseChannelForTx(final String channelId, final String
 			txId) {
-		final Channel<SmartContractMessage> channel = new Channel<>();
+		final Channel<SmartContractShim.SmartContractMessage> channel = new Channel<>();
 		String key = getTxKey(channelId, txId);
 		if (this.responseChannel.putIfAbsent(key, channel) != null) {
 			throw new IllegalStateException(format("[%-8s]Response channel already exists. Another request must be pending.", txId));
@@ -109,7 +109,7 @@ public class Handler {
 		return channel;
 	}
 
-	private synchronized void sendChannel(SmartContractMessage message) {
+	private synchronized void sendChannel(SmartContractShim.SmartContractMessage message) {
 		String key = getTxKey(message.getGroupId(), message.getTxid());
 		if (!responseChannel.containsKey(key)) {
 			throw new IllegalStateException(format("[%-8s]sendChannel does not exist", message.getTxid()));
@@ -120,7 +120,7 @@ public class Handler {
 		logger.info(String.format("[%-8s]After send", message.getTxid()));
 	}
 
-	private SmartContractMessage receiveChannel(Channel<SmartContractMessage> channel) {
+	private SmartContractShim.SmartContractMessage receiveChannel(Channel<SmartContractShim.SmartContractMessage> channel) {
 		try {
 			return channel.take();
 		} catch (InterruptedException e) {
@@ -134,7 +134,7 @@ public class Handler {
 
 	private synchronized void releaseResponseChannelForTx(String channelId, String txId) {
 		String key = getTxKey(channelId, txId);
-		final Channel<SmartContractMessage> channel = responseChannel.remove(key);
+		final Channel<SmartContractShim.SmartContractMessage> channel = responseChannel.remove(key);
 		if (channel != null) {
 			channel.close();
 		}
@@ -178,12 +178,12 @@ public class Handler {
 	 * @param message
 	 *            smartcontract to be initialized
 	 */
-	private void handleInit(SmartContractMessage message) {
+	private void handleInit(SmartContractShim.SmartContractMessage message) {
 		new Thread(() -> {
 			try {
 
 				// Get the function and args from Payload
-				final Smartcontract.SmartContractInput input = Smartcontract.SmartContractInput.parseFrom(message.getPayload());
+				final SmartContractPackage.SmartContractInput input = SmartContractPackage.SmartContractInput.parseFrom(message.getPayload());
 
 				// Mark as a transaction (allow put/del state)
 				markIsTransaction(message.getGroupId(), message.getTxid(), true);
@@ -220,7 +220,7 @@ public class Handler {
 	private void beforeInit(Event event) {
 		logger.info(String.format("Before %s event.", event.name));
 		logger.info(String.format("Current state %s", fsm.current()));
-		final SmartContractMessage message = extractMessageFromEvent(event);
+		final SmartContractShim.SmartContractMessage message = extractMessageFromEvent(event);
 		logger.info(String.format("[%-8s]Received %s, initializing smartcontract", message.getTxid(), message.getType()));
 		if (message.getType() == INIT) {
 			// Call the smartcontract's Run function to initialize
@@ -229,12 +229,12 @@ public class Handler {
 	}
 
 	// handleTransaction Handles request to execute a transaction.
-	private void handleTransaction(SmartContractMessage message) {
+	private void handleTransaction(SmartContractShim.SmartContractMessage message) {
 		new Thread(() -> {
 			try {
 
 				// Get the function and args from Payload
-				final Smartcontract.SmartContractInput input = Smartcontract.SmartContractInput.parseFrom(message.getPayload());
+				final SmartContractPackage.SmartContractInput input = SmartContractPackage.SmartContractInput.parseFrom(message.getPayload());
 
 				// Mark as a transaction (allow put/del state)
 				markIsTransaction(message.getGroupId(), message.getTxid(), true);
@@ -269,7 +269,7 @@ public class Handler {
 
 	// enterTransactionState will execute smartcontract's Run if coming from a TRANSACTION event.
 	private void beforeTransaction(Event event) {
-		SmartContractMessage message = extractMessageFromEvent(event);
+		SmartContractShim.SmartContractMessage message = extractMessageFromEvent(event);
 		logger.info(String.format("[%-8s]Received %s, invoking transaction on smartcontract(src:%s, dst:%s)", message.getTxid(), message.getType().toString(), event.src, event.dst));
 		if (message.getType() == TRANSACTION) {
 			// Call the smartcontract's Run function to invoke transaction
@@ -279,7 +279,7 @@ public class Handler {
 
 	// afterResponse is called to deliver a response or error to the smartcontract stub.
 	private void afterResponse(Event event) {
-		SmartContractMessage message = extractMessageFromEvent(event);
+		SmartContractShim.SmartContractMessage message = extractMessageFromEvent(event);
 		try {
 			sendChannel(message);
 			logger.info(String.format("[%-8s]Received %s, communicated (state:%s)", message.getTxid(), message.getType(), fsm.current()));
@@ -288,9 +288,9 @@ public class Handler {
 		}
 	}
 
-	private SmartContractMessage extractMessageFromEvent(Event event) {
+	private SmartContractShim.SmartContractMessage extractMessageFromEvent(Event event) {
 		try {
-			return (SmartContractMessage) event.args[0];
+			return (SmartContractShim.SmartContractMessage) event.args[0];
 		} catch (ClassCastException | ArrayIndexOutOfBoundsException e) {
 			final RuntimeException error = new RuntimeException("No smartcontract message found in event.", e);
 			event.cancel(error);
@@ -299,7 +299,7 @@ public class Handler {
 	}
 
 	private void afterError(Event event) {
-		SmartContractMessage message = extractMessageFromEvent(event);
+		SmartContractShim.SmartContractMessage message = extractMessageFromEvent(event);
 		/*
 		 * TODO- revisit. This may no longer be needed with the
 		 * serialized/streamlined messaging model There are two situations in
@@ -347,59 +347,59 @@ public class Handler {
 		invokeSmartContractSupport(newDeleteStateEventMessage(channelId, txId, key));
 	}
 
-	QueryResponse getStateByRange(String channelId, String txId, String startKey, String endKey) {
-		return invokeQueryResponseMessage(channelId, txId, GET_STATE_BY_RANGE, GetStateByRange.newBuilder()
+	SmartContractShim.QueryResponse getStateByRange(String channelId, String txId, String startKey, String endKey) {
+		return invokeQueryResponseMessage(channelId, txId, GET_STATE_BY_RANGE, SmartContractShim.GetStateByRange.newBuilder()
 				.setStartKey(startKey)
 				.setEndKey(endKey)
 				.build().toByteString());
 	}
 
-	QueryResponse queryStateNext(String channelId, String txId, String queryId) {
-		return invokeQueryResponseMessage(channelId, txId, QUERY_STATE_NEXT, QueryStateNext.newBuilder()
+	SmartContractShim.QueryResponse queryStateNext(String channelId, String txId, String queryId) {
+		return invokeQueryResponseMessage(channelId, txId, QUERY_STATE_NEXT, SmartContractShim.QueryStateNext.newBuilder()
 				.setId(queryId)
 				.build().toByteString());
 	}
 
 	void queryStateClose(String channelId, String txId, String queryId) {
-		invokeQueryResponseMessage(channelId, txId, QUERY_STATE_CLOSE, QueryStateClose.newBuilder()
+		invokeQueryResponseMessage(channelId, txId, QUERY_STATE_CLOSE, SmartContractShim.QueryStateClose.newBuilder()
 				.setId(queryId)
 				.build().toByteString());
 	}
 
-	QueryResponse getQueryResult(String channelId, String txId, String query) {
-		return invokeQueryResponseMessage(channelId, txId, GET_QUERY_RESULT, GetQueryResult.newBuilder()
+	SmartContractShim.QueryResponse getQueryResult(String channelId, String txId, String query) {
+		return invokeQueryResponseMessage(channelId, txId, GET_QUERY_RESULT, SmartContractShim.GetQueryResult.newBuilder()
 				.setQuery(query)
 				.build().toByteString());
 	}
 
-	QueryResponse getHistoryForKey(String channelId, String txId, String key) {
-		return invokeQueryResponseMessage(channelId, txId, GET_HISTORY_FOR_KEY, GetQueryResult.newBuilder()
+	SmartContractShim.QueryResponse getHistoryForKey(String channelId, String txId, String key) {
+		return invokeQueryResponseMessage(channelId, txId, GET_HISTORY_FOR_KEY, SmartContractShim.GetQueryResult.newBuilder()
 				.setQuery(key)
 				.build().toByteString());
 	}
 
-	private QueryResponse invokeQueryResponseMessage(String channelId, String txId, SmartContractMessage.Type type, ByteString payload) {
+	private SmartContractShim.QueryResponse invokeQueryResponseMessage(String channelId, String txId, SmartContractShim.SmartContractMessage.Type type, ByteString payload) {
 		try {
-			return QueryResponse.parseFrom(invokeSmartContractSupport(newEventMessage(type, channelId, txId, payload)));
+			return SmartContractShim.QueryResponse.parseFrom(invokeSmartContractSupport(newEventMessage(type, channelId, txId, payload)));
 		} catch (InvalidProtocolBufferException e) {
 			logger.error(String.format("[%-8s]unmarshall error", txId));
 			throw new RuntimeException("Error unmarshalling QueryResponse.", e);
 		}
 	}
 
-	private ByteString invokeSmartContractSupport(final SmartContractMessage message) {
+	private ByteString invokeSmartContractSupport(final SmartContractShim.SmartContractMessage message) {
 		final String channelId = message.getGroupId();
 		final String txId = message.getTxid();
 
 		try {
 			// create a new response channel
-			Channel<SmartContractMessage> responseChannel = aquireResponseChannelForTx(channelId, txId);
+			Channel<SmartContractShim.SmartContractMessage> responseChannel = aquireResponseChannelForTx(channelId, txId);
 
 			// send the message
 			chatStream.serialSend(message);
 
 			// wait for response
-			final SmartContractMessage response = receiveChannel(responseChannel);
+			final SmartContractShim.SmartContractMessage response = receiveChannel(responseChannel);
 			logger.info(format("[%-8s]%s response received.", txId, response.getType()));
 
 			// handle response
@@ -422,11 +422,11 @@ public class Handler {
 	ISmartContract.SmartContractResponse invokeSmartContract(String channelId, String txId, String smartcontractName, List<byte[]> args) {
 		try {
 			// create invocation specification of the smartcontract to invoke
-			final Smartcontract.SmartContractSpec invocationSpec = Smartcontract.SmartContractSpec.newBuilder()
-					.setSmartContractId(Smartcontract.SmartContractID.newBuilder()
+			final SmartContractPackage.SmartContractSpec invocationSpec = SmartContractPackage.SmartContractSpec.newBuilder()
+					.setSmartContractId(SmartContractPackage.SmartContractID.newBuilder()
 							.setName(smartcontractName)
 							.build())
-					.setInput(Smartcontract.SmartContractInput.newBuilder()
+					.setInput(SmartContractPackage.SmartContractInput.newBuilder()
 							.addAllArgs(args.stream().map(ByteString::copyFrom).collect(Collectors.toList()))
 							.build())
 					.build();
@@ -436,7 +436,7 @@ public class Handler {
 
 			// response message payload should be yet another smartcontract
 			// message (the actual response message)
-			final SmartContractMessage responseMessage = SmartContractMessage.parseFrom(payload);
+			final SmartContractShim.SmartContractMessage responseMessage = SmartContractShim.SmartContractMessage.parseFrom(payload);
 			// the actual response message must be of type COMPLETED
 			logger.info(String.format("[%-8s]%s response received from other smartcontract.", txId, responseMessage.getType()));
 			if (responseMessage.getType() == COMPLETED) {
@@ -453,9 +453,9 @@ public class Handler {
 
 	// handleMessage message handles loop for org.bcia.javachain.shim side
 	// of smartcontract/validator stream.
-	public synchronized void handleMessage(SmartContractMessage message) throws Exception {
+	public synchronized void handleMessage(SmartContractShim.SmartContractMessage message) throws Exception {
 
-		if (message.getType() == SmartContractMessage.Type.KEEPALIVE) {
+		if (message.getType() == SmartContractShim.SmartContractMessage.Type.KEEPALIVE) {
 			logger.info(String.format("[%-8s] Recieved KEEPALIVE message, do nothing", message.getTxid()));
 			// Received a keep alive message, we don't do anything with it for
 			// now and it does not touch the state machine
@@ -487,7 +487,7 @@ public class Handler {
 		}
 	}
 
-	private static String toJsonString(SmartContractMessage message) {
+	private static String toJsonString(SmartContractShim.SmartContractMessage message) {
 		try {
 			return JsonFormat.printer().print(message);
 		} catch (InvalidProtocolBufferException e) {
@@ -499,60 +499,60 @@ public class Handler {
 		return new ISmartContract.SmartContractResponse(ISmartContract.SmartContractResponse.Status.INTERNAL_SERVER_ERROR, message, null);
 	}
 
-	private static SmartContractMessage newGetStateEventMessage(final String channelId, final String txId, final String key) {
+	private static SmartContractShim.SmartContractMessage newGetStateEventMessage(final String channelId, final String txId, final String key) {
 		return newEventMessage(GET_STATE, channelId, txId, ByteString.copyFromUtf8(key));
 	}
 
-	private static SmartContractMessage newPutStateEventMessage(final String channelId, final String txId, final String key, final ByteString value) {
-		return newEventMessage(PUT_STATE, channelId, txId, PutState.newBuilder()
+	private static SmartContractShim.SmartContractMessage newPutStateEventMessage(final String channelId, final String txId, final String key, final ByteString value) {
+		return newEventMessage(PUT_STATE, channelId, txId, SmartContractShim.PutState.newBuilder()
 				.setKey(key)
 				.setValue(value)
 				.build().toByteString());
 	}
 
-	private static SmartContractMessage newDeleteStateEventMessage(final String channelId, final String txId, final String key) {
+	private static SmartContractShim.SmartContractMessage newDeleteStateEventMessage(final String channelId, final String txId, final String key) {
 		return newEventMessage(DEL_STATE, channelId, txId, ByteString.copyFromUtf8(key));
 	}
 
-	private static SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final Throwable throwable) {
+	private static SmartContractShim.SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final Throwable throwable) {
 		return newErrorEventMessage(channelId, txId, printStackTrace(throwable));
 	}
 
-	private static SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final String message) {
+	private static SmartContractShim.SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final String message) {
 		return newErrorEventMessage(channelId, txId, message, null);
 	}
 
-	private static SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final String message, final SmartContractEventPackage.SmartContractEvent event) {
+	private static SmartContractShim.SmartContractMessage newErrorEventMessage(final String channelId, final String txId, final String message, final SmartContractEventPackage.SmartContractEvent event) {
 		return newEventMessage(ERROR, channelId, txId, ByteString.copyFromUtf8(message), event);
 	}
 
-	private static SmartContractMessage newCompletedEventMessage(final String channelId, final String txId, final ISmartContract.SmartContractResponse response, final SmartContractEventPackage.SmartContractEvent event) {
+	private static SmartContractShim.SmartContractMessage newCompletedEventMessage(final String channelId, final String txId, final ISmartContract.SmartContractResponse response, final SmartContractEventPackage.SmartContractEvent event) {
 		return newEventMessage(COMPLETED, channelId, txId, toProtoResponse(response).toByteString(), event);
 	}
 
-	private static SmartContractMessage newInvokeSmartcontractMessage(final String channelId, final String txId, final ByteString payload) {
+	private static SmartContractShim.SmartContractMessage newInvokeSmartcontractMessage(final String channelId, final String txId, final ByteString payload) {
 		return newEventMessage(INVOKE_SMARTCONTRACT, channelId, txId, payload, null);
 	}
 
-	private static SmartContractMessage newEventMessage(final SmartContractMessage.Type type, final String channelId, final String txId, final ByteString payload) {
+	private static SmartContractShim.SmartContractMessage newEventMessage(final SmartContractShim.SmartContractMessage.Type type, final String channelId, final String txId, final ByteString payload) {
 		return newEventMessage(type, channelId, txId, payload, null);
 	}
 
-	private static SmartContractMessage newEventMessage(final SmartContractMessage.Type type, final String channelId, final String txId, final ByteString payload, final SmartContractEventPackage.SmartContractEvent event) {
+	private static SmartContractShim.SmartContractMessage newEventMessage(final SmartContractShim.SmartContractMessage.Type type, final String channelId, final String txId, final ByteString payload, final SmartContractEventPackage.SmartContractEvent event) {
 		if (event == null) {
-			return SmartContractMessage.newBuilder()
+			return SmartContractShim.SmartContractMessage.newBuilder()
 					.setType(type)
 					.setGroupId(channelId)
 					.setTxid(txId)
 					.setPayload(payload)
 					.build();
 		} else {
-			return SmartContractMessage.newBuilder()
+			return SmartContractShim.SmartContractMessage.newBuilder()
 					.setType(type)
 					.setGroupId(channelId)
 					.setTxid(txId)
 					.setPayload(payload)
-					.setSmartcontractEvent(event)
+					.setSmartContractEvent(event)
 					.build();
 		}
 	}
