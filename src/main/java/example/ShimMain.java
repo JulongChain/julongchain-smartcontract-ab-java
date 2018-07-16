@@ -25,6 +25,6 @@ package example;
 public class ShimMain {
 
   public static void main(String[] args) {
-	  new MyCc().start(args);
+	  new Demonstration().start(args);
   }
 }
