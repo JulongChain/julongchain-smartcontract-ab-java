@@ -1,11 +1,10 @@
 package test;
 
-import example.Example01;
+import smartcontract.Example01;
 import org.junit.Test;
 import shim.ISmartContract;
 import shim.ISmartContractStub;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 

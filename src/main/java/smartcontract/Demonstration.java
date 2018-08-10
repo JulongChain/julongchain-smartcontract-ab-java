@@ -1,4 +1,4 @@
-package example;
+package smartcontract;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +71,10 @@ public class Demonstration extends SmartContractBase {
         final String fromKeyState = stub.getStringState(fromKey);
         final String toKeyState = stub.getStringState(toKey);
 
+        if(fromKeyState.equals(toKeyState)){
+            return newErrorResponse("Please do not transfer money to yourself.");
+        }
+
         // 转账人余额获取类型转换
         Double fromAccountBalance = Double.parseDouble(fromKeyState);
         Double toAccountBalance = Double.parseDouble(toKeyState);
@@ -80,19 +84,21 @@ public class Demonstration extends SmartContractBase {
 
         // 确保金额足够
         if (transferAmount > fromAccountBalance) {
-            throw new IllegalArgumentException("Lack of funds");
+            return newErrorResponse("Lack of funds");
+        }if (transferAmount<0){
+            return newErrorResponse("The transfer amount must be greater than zero");
         }
+        else{
+            // 转账操作
+            log.info(format("%s transfer %f to %s", fromKey, transferAmount, toKey));
+            Double newFromAccountBalance = fromAccountBalance - transferAmount;
+            Double newToAccountBalance = toAccountBalance + transferAmount;
+            log.info(format("balance: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
+            stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
+            stub.putStringState(toKey, Double.toString(newToAccountBalance));
 
-        // 转账操作
-        log.info(format("%s transfer %f to %s", fromKey, transferAmount, toKey));
-        Double newFromAccountBalance = fromAccountBalance - transferAmount;
-        Double newToAccountBalance = toAccountBalance + transferAmount;
-        log.info(format("balance: %s = %f, %s = %f", fromKey, newFromAccountBalance, toKey, newToAccountBalance));
-        stub.putStringState(fromKey, Double.toString(newFromAccountBalance));
-        stub.putStringState(toKey, Double.toString(newToAccountBalance));
-
-        return newSuccessResponse(format("Successful transfer %f ,", transferAmount));
-
+            return newSuccessResponse(format("Successful transfer %f ,", transferAmount));
+        }
     }
 
     // 查询
