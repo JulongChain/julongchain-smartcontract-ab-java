@@ -71,7 +71,7 @@ public class Demonstration extends SmartContractBase {
         final String fromKeyState = stub.getStringState(fromKey);
         final String toKeyState = stub.getStringState(toKey);
 
-        if(fromKeyState.equals(toKeyState)){
+        if(fromKey.equals(toKey)){
             return newErrorResponse("Please do not transfer money to yourself.");
         }
 
