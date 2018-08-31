@@ -104,6 +104,9 @@ public class Demonstration extends SmartContractBase {
     // 查询
     private SmartContractResponse query(ISmartContractStub stub, String[] args) {
         if (args.length != 1) throw new IllegalArgumentException("Parameter error");
+        if (args[0] == null){
+            return newErrorResponse("args[0]为空");
+        }
         final String accountKey = args[0];
         double amount = Double.parseDouble(stub.getStringState(accountKey));
         String message ="[{\"name\":\""+accountKey+"\",\"value\":"+amount+"}]";

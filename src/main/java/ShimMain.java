@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import smartcontract.AccountingVoucher;
 import smartcontract.Demonstration;
 
 /**
@@ -27,6 +26,6 @@ import smartcontract.Demonstration;
 public class ShimMain {
 
   public static void main(String[] args) {
-	  new AccountingVoucher().start(args);
+	  new Demonstration().start(args);
   }
 }
