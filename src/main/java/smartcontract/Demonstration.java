@@ -102,16 +102,17 @@ public class Demonstration extends SmartContractBase {
         }
 
         else{
+
             // 转账操作
-            log.info("\n================================"+format("%s transfer %s to %s", fromKey, transferAmount.setScale(10, BigDecimal.ROUND_HALF_UP).toString(), toKey));
+            log.info("\n================================"+format("%s transfer %s to %s", fromKey, transferAmount.toString(), toKey));
             BigDecimal newFromAccountBalance = fromAccountBalance.subtract(transferAmount);
             BigDecimal newToAccountBalance = toAccountBalance.add(transferAmount);
-            log.info("\n================================"+format("balance: %s = %s, %s = %s", fromKey, newFromAccountBalance.setScale(10, BigDecimal.ROUND_HALF_UP).toString(), toKey, newToAccountBalance.setScale(10, BigDecimal.ROUND_HALF_UP).toString()));
+            log.info("\n================================"+format("balance: %s = %s, %s = %s", fromKey, newFromAccountBalance.toString(), toKey, newToAccountBalance.toString()));
 
-            stub.putState(fromKey, newFromAccountBalance.setScale(10, BigDecimal.ROUND_HALF_UP).toString().getBytes(StandardCharsets.UTF_8));
-            stub.putState(toKey, newToAccountBalance.setScale(10, BigDecimal.ROUND_HALF_UP).toString().getBytes(StandardCharsets.UTF_8));
+            stub.putState(fromKey, newFromAccountBalance.toString().getBytes(StandardCharsets.UTF_8));
+            stub.putState(toKey, newToAccountBalance.toString().getBytes(StandardCharsets.UTF_8));
 
-            return newSuccessResponse("Successful transfer "+transferAmount.setScale(10, BigDecimal.ROUND_HALF_UP).toString());
+            return newSuccessResponse("Successful transfer "+transferAmount.toString());
         }
     }
 
@@ -123,7 +124,7 @@ public class Demonstration extends SmartContractBase {
         }
         final String accountKey = args[0];
         BigDecimal amount = new BigDecimal(stub.getStringState(accountKey));
-        String message ="[{\"name\":\""+accountKey+"\",\"value\":"+amount.setScale(10, BigDecimal.ROUND_HALF_UP).toString()+"}]";
+        String message ="[{\"name\":\""+accountKey+"\",\"value\":"+amount.toString()+"}]";
         return newSuccessResponse(message);
     }
 }
