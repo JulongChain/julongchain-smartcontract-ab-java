@@ -100,6 +100,7 @@ public class Demonstration extends SmartContractBase {
         }if (transferAmount.compareTo(BigDecimal.valueOf(0))<0){
             return newErrorResponse("The transfer amount must be greater than zero");
         }
+
         else{
             // 转账操作
             log.info("\n================================"+format("%s transfer %s to %s", fromKey, transferAmount.setScale(10, BigDecimal.ROUND_HALF_UP).toString(), toKey));
