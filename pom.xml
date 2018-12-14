@@ -76,7 +76,7 @@
     </dependencies>
 
     <build>
-        <finalName>julongchain-smartcontract-shim-java</finalName>
+        <finalName>julongchain-smartcontract-java</finalName>
 
         <extensions>
             <extension>
