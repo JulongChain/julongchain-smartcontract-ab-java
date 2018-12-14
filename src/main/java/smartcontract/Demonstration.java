@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import shim.ISmartContractStub;
 import shim.SmartContractBase;
 
-
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
