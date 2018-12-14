@@ -73,9 +73,19 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.47</version>
         </dependency>
+
+        <dependency>
+            <groupId>julongchain-smartcontract-sdk-java</groupId>
+            <artifactId>julongchain-smartcontract-sdk</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/julongchain-smartcontract-sdk-java.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <!--jar包名称不可更改-->
         <finalName>julongchain-smartcontract-java</finalName>
 
         <extensions>
