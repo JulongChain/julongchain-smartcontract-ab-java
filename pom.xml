@@ -20,6 +20,12 @@
     <dependencies>
 
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
@@ -67,9 +73,19 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.47</version>
         </dependency>
+
+        <dependency>
+            <groupId>julongchain-smartcontract-sdk-java</groupId>
+            <artifactId>julongchain-smartcontract-sdk</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/julongchain-smartcontract-sdk-java.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <!--jar包名称不可更改-->
         <finalName>julongchain-smartcontract-java</finalName>
 
         <extensions>
@@ -135,7 +151,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>example.ShimMain</mainClass>
+                            <mainClass>ShimMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -162,7 +178,7 @@
                             <!-- 所有的依赖项应该位于 lib文件夹 -->
                             <classpathPrefix>lib/</classpathPrefix>
                             <!-- 当用户使用 lib命令执行JAR文件时，使用该元素定义将要执行的类名 -->
-                            <mainClass>example.ShimMain</mainClass>
+                            <mainClass>ShimMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

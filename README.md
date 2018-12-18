@@ -1,1 +1,1 @@
-javachain-smartcontract-java
+# AB转账智能合约例子
